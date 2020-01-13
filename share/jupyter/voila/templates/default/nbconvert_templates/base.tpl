@@ -1,5 +1,4 @@
 {%- extends 'lab.tpl' -%}
-{% from 'mathjax.tpl' import mathjax %}
 
 {%- block header -%}
 <!DOCTYPE html>
@@ -19,20 +18,31 @@
     crossorigin="anonymous">
 </script>
 
-<script id="jupyter-config-data" type="application/json">
-{
-    "baseUrl": "{{resources.base_url}}",
-    "kernelId": "{{resources.kernel_id}}"
-}
-</script>
+{% block notebook_execute %}
+    {%- set kernel_id = kernel_start() -%}
+    <script id="jupyter-config-data" type="application/json">
+    {
+        "baseUrl": "{{resources.base_url}}",
+        "kernelId": "{{kernel_id}}"
+    }
+    </script>
+    {# from this point on, nb.cells contains output of the executed cells #}
+    {% do notebook_execute(nb, kernel_id) %}
+{%- endblock notebook_execute -%}
+
 {%- endblock html_head_js -%}
 
 {%- block html_head_css -%}
+  <style>
+    /*Hide empty cells*/
+    .jp-mod-noOutputs.jp-mod-noInput {
+      display: none;
+    }
+  </style>
 {%- endblock html_head_css -%}
 {%- endblock html_head -%}
 </head>
 {%- endblock header -%}
-
 
 {% block footer %}
 {% block footer_js %}
